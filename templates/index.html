@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المساعد الدراسي للبكالوريا - AI Study Guardian</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Cairo', sans-serif; }</style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center p-4">
+
+    <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl">
+        
+        {% if step == 'onboarding' %}
+        <div class="text-center mb-6">
+            <span class="text-4xl">🎓</span>
+            <h1 class="text-2xl font-black mt-2 text-indigo-400">الحارس الدراسي الذكي</h1>
+            <p class="text-slate-400 text-sm mt-1">ابدأ بتهيئة ملفك الشخصي لنبني لك خطة تتكيف مع مستواك.</p>
+        </div>
+
+        <form id="onboardingForm" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1">اسمك الكريم:</label>
+                <input type="text" name="name" required class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1">الشعبة الدراسية:</label>
+                <select name="stream" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500">
+                    <option value="علوم تجريبية">علوم تجريبية</option>
+                    <option value="رياضيات">رياضيات</option>
+                    <option value="تقني رياضي">تقني رياضي</option>
+                    <option value="تسيير واقتصاد">تسيير واقتصاد</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1">هدف معدل البكالوريا المنشود:</label>
+                <input type="text" name="target_score" placeholder="مثال: 17/20" required class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1">ساعات الدراسة المتاحة يومياً:</label>
+                <input type="number" name="study_hours" value="5" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500">
+            </div>
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 font-bold py-3 rounded-xl transition duration-200 mt-4 shadow-lg shadow-indigo-600/30">
+                إنشاء الخطة التكيفية الذكية 🚀
+            </button>
+        </form>
+
+        <script>
+            document.getElementById('onboardingForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                let formData = new URLSearchParams(new FormData(e.target));
+                let res = await fetch('/submit_onboarding', { method: 'POST', body: formData });
+                let data = await res.json();
+                if(data.status === 'success') window.location.reload();
+            });
+        </script>
+
+        {% else %}
+        <div class="flex justify-between items-center mb-6 border-b border-slate-800 pb-4">
+            <div>
+                <h2 class="text-lg font-black text-indigo-400">مرحباً، {{ profile.name }} 👋</h2>
+                <p class="text-xs text-slate-400">الشعبة: {{ profile.stream }}</p>
+            </div>
+            <div class="bg-indigo-500/10 border border-indigo-500/20 px-3 py-1.5 rounded-xl text-center">
+                <span class="block text-xs text-indigo-300">الهدف</span>
+                <span class="text-sm font-bold text-indigo-400">{{ profile.target_score }}</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 mb-6">
+            <div class="bg-slate-800/50 border border-slate-800 p-3 rounded-2xl text-center">
+                <span class="text-xs text-slate-400 block">المعدل المتوقع 📈</span>
+                <span class="text-xl font-black text-emerald-400">{{ profile.expected_average }}/20</span>
+            </div>
+            <div class="bg-slate-800/50 border border-slate-800 p-3 rounded-2xl text-center">
+                <span class="text-xs text-slate-400 block">التماسك (Streak) 🔥</span>
+                <span class="text-xl font-black text-orange-400">{{ profile.streak }} أيام</span>
+            </div>
+        </div>
+
+        <h3 class="text-sm font-bold text-slate-300 mb-3">📋 المهام الموصى بها اليوم (حسب الأولوية):</h3>
+        <div class="space-y-3 mb-6">
+            {% for task in tasks %}
+            <div class="bg-slate-800/80 border border-slate-700/50 p-3 rounded-2xl flex justify-between items-center">
+                <div>
+                    <h4 class="text-sm font-bold text-white">{{ task.lesson }}</h4>
+                    <span class="text-xs text-indigo-400">{{ task.subject }}</span>
+                </div>
+                <div class="text-left">
+                    <span class="text-xs bg-slate-900 px-2 py-1 rounded-lg text-slate-300">أولوية: {{ task.priority_score }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="bg-slate-800/30 border border-slate-800 p-4 rounded-2xl">
+            <h3 class="text-xs font-bold text-slate-300 mb-2">⚠️ محاكاة دفتر الأخطاء الذكي (اختبار التكيف):</h3>
+            <p class="text-xs text-slate-400 mb-3">هل أخطأت في درس معين اليوم؟ سجل الخطأ لترى كيف سيعيد الذكاء الاصطناعي ترتيب الخطة:</p>
+            <button onclick="simulateError()" class="w-full bg-rose-600/20 border border-rose-500/30 hover:bg-rose-600/30 text-rose-400 font-bold py-2 rounded-xl text-xs transition duration-200">
+                تسجيل خطأ في "الدوال العددية" وتحديث الخطة 🔄
+            </button>
+        </div>
+
+        <script>
+            async function simulateError() {
+                let res = await fetch('/log_error', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({lesson: 'الدوال العددية', error_type: 'ضعف التركيز'})
+                });
+                let data = await res.json();
+                alert(data.message);
+                window.location.reload();
+            }
+        </script>
+        {% endif %}
+
+    </div>
+
+</body>
+</html>
